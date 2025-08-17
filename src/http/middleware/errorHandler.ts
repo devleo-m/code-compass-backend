@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
-import { AppError, ValidationError } from '../utils/errors';
-import { errorResponse } from '../utils/response';
+import { AppError, ValidationError } from '../../utils/errors';
+import { errorResponse } from '../../utils/response';
 
 // Middleware para tratar erros
 export const errorHandler = (

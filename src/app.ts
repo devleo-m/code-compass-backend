@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 
 // Importa utilitários
 import { successResponse } from './utils/response';
-import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import { errorHandler, notFoundHandler } from './http/middleware/errorHandler';
 
 // Importa rotas
 import { healthRoutes } from './http/routers';

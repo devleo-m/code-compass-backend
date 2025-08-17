@@ -1,6 +1,6 @@
 import rateLimit from 'express-rate-limit';
-import { config } from '../config/environment';
-import { logger } from '../config/logger';
+import { config } from '../../config/environment';
+import { logger } from '../../config/logger';
 
 // Rate limiter global
 export const rateLimiter = rateLimit({
