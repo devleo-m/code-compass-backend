@@ -1,4 +1,5 @@
 import type { Response } from 'express';
+import dayjs from 'dayjs';
 
 // Estrutura padrão das respostas
 interface ApiResponse<T = any> {
@@ -21,7 +22,7 @@ export const successResponse = <T>(
     success: true,
     message,
     data,
-    timestamp: new Date().toISOString(),
+    timestamp: dayjs().format('YYYY-MM-DD HH:mm'),
   };
 
   return res.status(statusCode).json(response);
@@ -40,7 +41,7 @@ export const errorResponse = (
     message,
     code,
     errors,
-    timestamp: new Date().toISOString(),
+    timestamp: dayjs().format('YYYY-MM-DD HH:mm'),
   };
 
   return res.status(statusCode).json(response);

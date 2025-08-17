@@ -7,6 +7,9 @@ import dotenv from 'dotenv';
 import { successResponse } from './utils/response';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 
+// Importa rotas
+import { healthRoutes } from './http/routers';
+
 // Carrega variáveis de ambiente
 dotenv.config();
 
@@ -21,6 +24,16 @@ app.use(express.urlencoded({ extended: true })); // Parse URL encoded
 
 // ===== ROTAS =====
 
+// Rota principal
+app.get('/', (req, res) => {
+  successResponse(res, 'Code Compass Backend está funcionando!', {
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+  });
+});
+
+// Health routes
+app.use('/app', healthRoutes);
 
 // ===== TRATAMENTO DE ERROS =====
 app.use(notFoundHandler); // 404
