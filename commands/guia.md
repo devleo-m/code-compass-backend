@@ -978,10 +978,10 @@ lessonId?: "lesson-uuid" (opcional, para arquivos de conteúdo)
 - [x] Estrutura de pastas hexagonal
 
 #### Dia 2:
-- [ ] Configurar Sequelize + PostgreSQL
-- [ ] Configurar Redis
-- [ ] Middlewares básicos (CORS, helmet, etc)
-- [ ] Sistema de logs com Winston
+- [x] Configurar Sequelize + PostgreSQL
+- [x] Configurar Redis
+- [x] Middlewares básicos (CORS, helmet, etc)
+- [x] Sistema de logs com Winston
 - [x] Health check endpoints
 
 #### Dia 3:
