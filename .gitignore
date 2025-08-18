@@ -4,3 +4,4 @@ node_modules
 .cursor/rules
 .cursor/rules/rules.mdc
 commands/guia.md
+dist

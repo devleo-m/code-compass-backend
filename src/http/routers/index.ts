@@ -1,1 +1,1 @@
-export * from './health.routes'
+export { healthRoutes } from './health.routes';
