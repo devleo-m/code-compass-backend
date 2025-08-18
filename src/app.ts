@@ -14,8 +14,10 @@ import { healthRoutes } from './http/routers';
 // Carrega variáveis de ambiente
 dotenv.config();
 
-// Conectar ao banco de dados
-connectDatabase();
+// Conectar ao banco de dados (não trava se falhar)
+connectDatabase().catch(error => {
+  console.log('⚠️  Banco de dados não conectado ainda:', error.message);
+});
 
 // Cria a aplicação Express
 const app = express();
