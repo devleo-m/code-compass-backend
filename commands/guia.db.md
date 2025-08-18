@@ -413,3 +413,44 @@ await queryInterface.bulkInsert('roles', roles);
 ---
 
 **Este guia deve ser seguido religiosamente para manter consistência e qualidade no banco de dados!** 🎯
+
+---
+
+## 📊 **Estrutura Atual do Banco**
+
+### **Tabelas Implementadas**
+- ✅ **roles** - Papéis dos usuários (admin, student)
+- ✅ **countries** - Países (Brasil, EUA, Reino Unido, França, Alemanha, Argentina, Canadá, Portugal)
+- ✅ **states** - Estados/Províncias (todos os 27 estados brasileiros + alguns americanos)
+- ✅ **cities** - Cidades (principais cidades brasileiras + algumas americanas)
+- ✅ **users** - Usuários do sistema (com relacionamentos completos)
+
+### **Relacionamentos**
+```
+users -> roles (n:1, obrigatório)
+users -> countries (n:1, opcional)
+users -> states (n:1, opcional)  
+users -> cities (n:1, opcional)
+states -> countries (n:1, obrigatório)
+cities -> states (n:1, obrigatório)
+cities -> countries (n:1, denormalizado para performance)
+```
+
+### **Usuários Padrão Criados**
+- **Admin**: admin@codecompass.com.br / Admin@123456
+- **Estudante 1**: joao.silva@example.com / Student@123456
+- **Estudante 2**: maria.santos@example.com / Student@123456  
+- **Demo (inativo)**: pedro.demo@example.com / Student@123456
+
+### **Dados Geográficos**
+- **8 países** cadastrados
+- **27 estados brasileiros** + 4 estados americanos
+- **Mais de 80 cidades** brasileiras (3 por estado) + cidades americanas
+
+### **Funcionalidades dos Models**
+- **Soft delete** em todas as tabelas (paranoid: true)
+- **Timestamps** automáticos (createdAt, updatedAt, deletedAt)
+- **UUIDs** como chaves primárias
+- **Validações** nos campos (email, telefone, URLs, etc)
+- **Métodos auxiliares** (fullName, toPublicJSON, etc)
+- **Campos JSON** para preferências do usuário
