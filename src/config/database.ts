@@ -1,11 +1,18 @@
 import { Sequelize } from 'sequelize';
-import { config } from './environment';
-import { logger } from './logger';
 
-// Cria instância do Sequelize
-export const sequelize = new Sequelize(config.database.url, {
+// Configuração do banco
+const DB_HOST = process.env.DATABASE_HOST || 'localhost';
+const DB_PORT = Number(process.env.DATABASE_PORT) || 5432;
+const DB_NAME = process.env.DATABASE_NAME || 'code_compass_dev';
+const DB_USER = process.env.DATABASE_USER || 'root';
+const DB_PASSWORD = process.env.DATABASE_PASSWORD || 'root';
+
+// Criar instância do Sequelize
+export const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
+  host: DB_HOST,
+  port: DB_PORT,
   dialect: 'postgres',
-  logging: config.isDevelopment ? (msg) => logger.debug(msg) : false,
+  logging: process.env.NODE_ENV === 'development' ? console.log : false,
   pool: {
     max: 10,
     min: 0,
@@ -19,30 +26,24 @@ export const sequelize = new Sequelize(config.database.url, {
   },
 });
 
-// Função para conectar ao banco
-export async function connectDatabase(): Promise<void> {
+// Função para conectar
+export const connectDatabase = async (): Promise<void> => {
   try {
     await sequelize.authenticate();
-    logger.info('🗄️  Conexão com PostgreSQL estabelecida com sucesso');
-    
-    // Sincroniza modelos apenas em desenvolvimento
-    if (config.isDevelopment) {
-      await sequelize.sync({ alter: true });
-      logger.info('📋 Modelos sincronizados com o banco de dados');
-    }
+    console.log('✅ PostgreSQL conectado com sucesso');
   } catch (error) {
-    logger.error('❌ Erro ao conectar com o banco de dados:', error);
+    console.error('❌ Erro ao conectar PostgreSQL:', error);
     throw error;
   }
-}
+};
 
-// Função para desconectar do banco
-export async function disconnectDatabase(): Promise<void> {
+// Função para desconectar
+export const disconnectDatabase = async (): Promise<void> => {
   try {
     await sequelize.close();
-    logger.info('🔌 Conexão com PostgreSQL fechada');
+    console.log('🔌 PostgreSQL desconectado');
   } catch (error) {
-    logger.error('❌ Erro ao fechar conexão com o banco:', error);
+    console.error('❌ Erro ao desconectar PostgreSQL:', error);
     throw error;
   }
-}
+};

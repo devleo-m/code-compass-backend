@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import { connectDatabase } from './config/database';
 
 // Importa utilitários
 import { successResponse } from './utils/response';
@@ -12,6 +13,9 @@ import { healthRoutes } from './http/routers';
 
 // Carrega variáveis de ambiente
 dotenv.config();
+
+// Conectar ao banco de dados
+connectDatabase();
 
 // Cria a aplicação Express
 const app = express();

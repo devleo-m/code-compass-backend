@@ -3,5 +3,4 @@ node_modules
 .cursor
 .cursor/rules
 .cursor/rules/rules.mdc
-commands/guia.md
 dist
