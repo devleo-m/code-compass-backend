@@ -5,6 +5,7 @@
 ### **Estrutura de Pastas**
 ```
 src/database/
+├── interface/      # Types e interfaces TypeScript
 ├── migrations/     # Arquivos de migração (DDL)
 ├── models/         # Models do Sequelize (TypeScript)
 └── seeders/        # Seeds para dados iniciais
@@ -18,9 +19,10 @@ src/database/
 - ✅ **Inglês**: Sempre em inglês
 
 #### **Colunas**
-- ✅ **snake_case**: `created_at`, `is_active`, `user_id`
+- ✅ **camelCase**: `createdAt`, `isActive`, `userId` (no código TypeScript)
+- ✅ **snake_case**: `created_at`, `is_active`, `user_id` (no banco físico)
 - ✅ **Inglês**: Sempre em inglês
-- ✅ **Descritivo**: `email_verified` ao invés de `verified`
+- ✅ **Descritivo**: `emailVerified` ao invés de `verified`
 
 #### **PKs e FKs**
 - ✅ **UUID**: Sempre usar UUID v4 como chave primária
@@ -28,7 +30,8 @@ src/database/
 
 #### **Arquivos**
 - ✅ **Migrations**: `YYYYMMDDHHMMSS-action-table-name.js`
-- ✅ **Models**: `PascalCase.ts` (ex: `Role.ts`, `User.ts`)
+- ✅ **Models**: `entity.model.ts` (ex: `role.model.ts`, `user.model.ts`)
+- ✅ **Types**: `entity.types.ts` (ex: `role.types.ts`, `user.types.ts`)
 - ✅ **Seeds**: `YYYYMMDDHHMMSS-description.js`
 
 ---
@@ -48,25 +51,36 @@ npx sequelize-cli migration:generate --name create-roles-table
 ```javascript
 'use strict';
 
+/** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
+  async up(queryInterface, DataTypes) {
     await queryInterface.createTable('table_name', {
       id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
         allowNull: false,
       },
-      // ... outras colunas
-      created_at: {
-        type: Sequelize.DATE,
+      // ... outras colunas (camelCase)
+      isActive: {
+        type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: Sequelize.NOW,
+        defaultValue: true,
       },
-      updated_at: {
-        type: Sequelize.DATE,
+      createdAt: {
+        type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: Sequelize.NOW,
+        defaultValue: DataTypes.NOW,
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
+      deletedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: null,
       },
     }, {
       comment: 'Descrição da tabela',
@@ -76,7 +90,7 @@ module.exports = {
     });
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface) {
     await queryInterface.dropTable('table_name');
   }
 };
@@ -84,66 +98,95 @@ module.exports = {
 
 ### **2. Types/Interfaces**
 ```typescript
-// src/types/entity.types.ts
-export interface IEntity {
-  id: string;
-  // ... propriedades
-  createdAt: Date;
-  updatedAt: Date;
-}
-
+// src/database/interface/entity.types.ts
 export enum EntityEnum {
   VALUE1 = 'value1',
   VALUE2 = 'value2',
+}
+
+export interface IEntity {
+  id: string;
+  // ... propriedades
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date;
+}
+
+export interface IEntityCreation {
+  // Campos obrigatórios para criação (sem id, timestamps)
+  name: string;
+  isActive?: boolean;
+}
+
+export interface IEntityUpdate {
+  // Campos opcionais para atualização
+  name?: string;
+  isActive?: boolean;
 }
 ```
 
 ### **3. Model (ORM)**
 ```typescript
-// src/database/models/Entity.ts
-import { DataTypes, Model, Sequelize } from 'sequelize';
-import type { IEntity } from '../../types/entity.types';
+// src/database/models/entity.model.ts
+import { DataTypes, Model } from 'sequelize';
+import type { IEntity, IEntityCreation } from '../interface/entity.types';
+import { sequelize } from '@/config/database';
 
-interface EntityAttributes {
-  id: string;
-  // ... propriedades
-  createdAt: Date;
-  updatedAt: Date;
+class Entity extends Model<IEntity, IEntityCreation> implements IEntity {
+  id!: string;
+  // ... propriedades específicas
+  isActive!: boolean;
+  createdAt!: Date;
+  updatedAt!: Date;
+  deletedAt!: Date;
 }
 
-interface EntityCreationAttributes {
-  // Campos obrigatórios para criação
-}
-
-export class Entity extends Model<EntityAttributes, EntityCreationAttributes> implements IEntity {
-  public id!: string;
-  // ... propriedades
-
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
-
-  static initModel(sequelize: Sequelize): typeof Entity {
-    Entity.init({
-      id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        primaryKey: true,
-        allowNull: false,
-      },
-      // ... definições de campos
-    }, {
-      sequelize,
-      modelName: 'Entity',
-      tableName: 'entities',
-      timestamps: true,
-      underscored: true,
-    });
-
-    return Entity;
+Entity.init(
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+      allowNull: false,
+    },
+    // ... campos específicos
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+      field: 'is_active', // snake_case no banco
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      field: 'created_at',
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      field: 'updated_at',
+    },
+    deletedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'deleted_at',
+    },
+  },
+  {
+    sequelize,
+    modelName: 'Entity',
+    tableName: 'entities',
+    timestamps: true,
+    paranoid: true, // Soft delete
+    underscored: true, // snake_case no banco
+    indexes: [
+      // Índices necessários
+    ],
   }
+);
 
-  // Métodos personalizados
-}
+export { Entity };
 ```
 
 ### **4. Seed (Dados Iniciais)**
@@ -161,28 +204,34 @@ npx sequelize-cli seed:generate --name create-default-roles
 
 const { v4: uuidv4 } = require('uuid');
 
+/** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
+  async up(queryInterface) {
     const now = new Date();
     
     const data = [
       {
         id: uuidv4(),
-        // ... dados
-        created_at: now,
-        updated_at: now,
+        // ... dados (camelCase)
+        isActive: true,
+        createdAt: now,
+        updatedAt: now,
       },
     ];
 
     await queryInterface.bulkInsert('table_name', data, {
       ignoreDuplicates: true,
     });
+
+    console.log('✅ Default data created successfully');
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface) {
     await queryInterface.bulkDelete('table_name', {
       // critérios para deletar
     });
+
+    console.log('✅ Default data removed successfully');
   }
 };
 ```
@@ -239,13 +288,10 @@ npm run db:reset
 
 ### **Campos Obrigatórios**
 - ✅ **id**: UUID v4 (sempre)
-- ✅ **created_at**: Timestamp automático
-- ✅ **updated_at**: Timestamp automático
-
-### **Campos Opcionais Comuns**
-- 🔄 **is_active**: Boolean (padrão: true)
-- 🔄 **deleted_at**: Soft delete timestamp
-- 🔄 **version**: Controle de versão
+- ✅ **isActive**: Boolean (padrão: true)
+- ✅ **createdAt**: Timestamp automático
+- ✅ **updatedAt**: Timestamp automático
+- ✅ **deletedAt**: Soft delete timestamp (null por padrão)
 
 ### **Validações**
 - ✅ **Unique constraints**: Para campos únicos
